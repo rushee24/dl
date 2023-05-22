@@ -1,0 +1,58 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <omp.h>
+using namespace std;
+
+const int MAX = 10000;
+vector<int> graph[MAX];
+bool visited[MAX];
+
+void bfs(int node) {
+	queue<int> q;
+	q.push(node);
+
+	while (!q.empty()) {
+		int curr_node = q.front();
+		q.pop();
+
+		if (!visited[curr_node]) {
+			visited[curr_node] = true;
+			cout << "Node " << curr_node << " Visited." << endl;
+			#pragma omp parallel for
+			for (int i = 0; i < graph[curr_node].size(); i++) {
+				int adj_node = graph[curr_node][i];
+				if (!visited[adj_node]) {
+					q.push(adj_node);
+				}
+			}
+		}
+	}
+}
+
+int main() {
+	int n, m, start_node;
+	cout << "Enter no. of nodes: ";
+	cin >> n;
+	cout << "Enter no. of Edges: ";
+	cin >> m;
+	cout << "Enter start node: ";
+	cin >> start_node;
+
+	cout << "Enter two nodes to be connected\n";
+
+	for (int i = 0; i < m; i++) {
+		int u, v;
+		cin >> u >> v;
+		graph[u].push_back(v);
+		graph[v].push_back(u);
+	}
+	#pragma omp parallel for
+	for (int i = 0; i < n; i++) {
+		visited[i] = false;
+	}
+
+	bfs(start_node);
+
+	return 0;
+}
